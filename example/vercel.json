@@ -4,5 +4,11 @@
             "src": "index.py",
             "use": "@potatohd/vercel-package-installer1"
         }
+    ],
+    "routes": [
+        {
+            "src": "/(.*)",
+            "dest": "index.py"
+        }
     ]
 }

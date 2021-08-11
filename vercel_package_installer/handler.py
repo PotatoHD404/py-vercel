@@ -18,12 +18,8 @@ from .exceprion_reporter import ExceptionReporter
 from werkzeug.datastructures import Headers
 from werkzeug.wrappers import Response
 from io import BytesIO
-from werkzeug._internal import _wsgi_encoding_dance, _to_bytes
-if sys.version_info[0] < 3:
-    from urllib import unquote, urlencode
-    from urlparse import urlparse
-else:
-    from urllib.parse import urlparse, unquote, urlencode
+from werkzeug._internal import _wsgi_encoding_dance, _to_bytes  # noqa
+from urllib.parse import urlparse, unquote
 
 # Set up logging
 root = logging.getLogger()
@@ -89,7 +85,7 @@ def handler(app, lambda_event, context):
     # response = Response.from_app(app, environ)
 
     response = Response(f"{environ['wsgi.input'].read().decode('utf-8')=}\n\n\
-{context.__dict__=}")
+{context.__dict__=}\n\n{event=}")
 
     # Handle multi-value headers
     headers = {}
@@ -111,9 +107,8 @@ def handler(app, lambda_event, context):
 
     if response.data:
         mimetype = response.mimetype or 'text/plain'
-        if (mimetype.startswith('text/')
-                or mimetype in TEXT_MIME_TYPES) and not response.headers.get(
-                    'Content-Encoding', ''):
+        if (mimetype.startswith('text/') or mimetype in TEXT_MIME_TYPES) and not response.headers.get(
+                'Content-Encoding', ''):
             returndict['body'] = response.get_data(as_text=True)
         else:
             returndict['body'] = base64.b64encode(
