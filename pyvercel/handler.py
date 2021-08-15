@@ -12,6 +12,7 @@ import logging
 from importlib import import_module
 import os
 import sys
+import typing as t
 
 from pyexceptions import handle_exceptions
 
@@ -117,12 +118,27 @@ def handler(app, lambda_event):
     return returndict
 
 
-@handle_exceptions(is_lambda=True, exclude=8)
+class CustomProxyFix(object):
+
+    def __init__(self, app):
+        self.app = app
+
+    def __call__(self, environ: dict, start_response: t.Callable) -> t.Any:
+        ctx = self.app.request_context(environ)
+        ctx.push()
+        response = self.app.full_dispatch_request()
+        return response(environ, start_response)
+
+
+@handle_exceptions(is_lambda=True)
 def vercel_handler(lambda_event, _):
     wsgi_app_data = os.environ.get('WSGI_APPLICATION').split('.')
     wsgi_module_name = '.'.join(wsgi_app_data[:-1])
     wsgi_app_name = wsgi_app_data[-1]
 
     wsgi_module = import_module(wsgi_module_name)
-    application = getattr(wsgi_module, wsgi_app_name)
-    return handler(application, lambda_event)
+    app = getattr(wsgi_module, wsgi_app_name)
+    # patch flask error handler
+    if hasattr(app, 'wsgi_app'):
+        app.wsgi_app = CustomProxyFix(app)
+    return handler(app, lambda_event)
