@@ -85,7 +85,7 @@ def handler(app, lambda_event, context):
     # response = Response.from_app(app, environ)
 
     response = Response(f"{environ['wsgi.input'].read().decode('utf-8')=}\n\n\
-{context.__dict__=}\n\n{event=}")
+{context.__dict__=}\n\n{event=}\n\n{lambda_event=}")
 
     # Handle multi-value headers
     headers = {}
