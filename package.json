@@ -1,6 +1,6 @@
 {
 	"name": "@potatohd/py-vercel",
-	"version": "1.0.12",
+	"version": "1.1.1",
 	"description": "Linux package installer on Vercel",
 	"main": "index.js",
 	"repository": {
@@ -11,6 +11,7 @@
 	"license": "MIT",
 	"private": false,
 	"dependencies": {
+		"@vercel/build-utils": "^2.12.2",
 		"command-exists": "^1.2.9",
 		"execa": "^1.0.0",
 		"fs.promised": "^3.0.0",

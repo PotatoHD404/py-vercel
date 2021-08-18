@@ -1,9 +1,9 @@
 const path = require('path');
 const { readFile } = require('fs.promised');
-const getWritableDirectory = require('@vercel/build-utils/fs/get-writable-directory'); // eslint-disable-line import/no-extraneous-dependencies
-const download = require('@vercel/build-utils/fs/download'); // eslint-disable-line import/no-extraneous-dependencies
-const glob = require('@vercel/build-utils/fs/glob'); // eslint-disable-line import/no-extraneous-dependencies
-const { createLambda } = require('@vercel/build-utils/lambda'); // eslint-disable-line import/no-extraneous-dependencies
+const getWritableDirectory = require('@vercel/build-utils/fs/get-writable-directory');
+const download = require('@vercel/build-utils/fs/download');
+const glob = require('@vercel/build-utils/fs/glob');
+const { createLambda } = require('@vercel/build-utils/lambda');
 
 const {
   log,
@@ -38,9 +38,8 @@ exports.build = async ({ files, entrypoint, config }) => {
 
   log.heading('Selecting python version');
   const pythonBin = await python.findPythonBinary(runtime);
-  const pyUserBase = await getWritableDirectory();
-  process.env.PYTHONUSERBASE = pyUserBase;
-
+  process.env.PYTHONUSERBASE = await getWritableDirectory();
+  process.env.DISABLE_HANDLER = config.production || 'false' === true ? 'true' : 'false';
   log.heading('Installing pip');
   const pipPath = await pip.downloadAndInstallPip(pythonBin);
 

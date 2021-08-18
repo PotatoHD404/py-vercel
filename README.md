@@ -68,13 +68,26 @@ $ vercel
 
 ### Linux requirements
 
-Your project may optionally include a `apt-requirements.txt` file to declare any
+Your project may optionally include a `setup.sh` or a `post-install.sh` file to declare any
 dependencies, e.g.:
 
-```text
-# apt-requirements.txt
-mysql
+```sh
+# setup.sh
+yum install -y gcc mysql-devel
+
+ln -s /usr/lib64/libmariadbclient.a /usr/lib64/libmariadb.a
+
+pip install -t $srcDir $srcDir/django-storages
 ```
+
+(`setup.sh` runs before python packages installation and `post-install.sh` after)
+
+As you can see, there is default variable `$srcDir` which contains
+path to your project folder. Also, yoy may notice that the server is on
+special Amazon Linux 2 runtime. So keep that in mind when you are writing scripts.
+
+Also be aware that on the runtime you must use the `-t` argument when installing
+python packages.
 
 ### Python requirements
 
@@ -113,6 +126,21 @@ Select the WSGI application to run from your entrypoint. Defaults to
 {
     "builds": [{
         "config": { "wsgiApplicationName": "application" }
+    }]
+}
+```
+
+
+### `production`
+
+Select whether the application is in production mode or not. When set to false,
+the debugger will appear on error. Defaults to
+false.
+
+```json
+{
+    "builds": [{
+        "config": { "production": true }
     }]
 }
 ```
@@ -161,7 +189,7 @@ then you can configure it as the entrypoint and adjust routes accordingly:
 ### Lambda environment limitations
 
 At the time of writing, Vercel runs on AWS Lambda. This has a number of
-implications on what libaries will be available to you, notably:
+implications on what libraries will be available to you, notably:
 
 - PostgreSQL, so psycopg2 won't work out of the box
 - MySQL, so MySQL adapters won't work out of the box either
