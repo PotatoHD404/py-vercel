@@ -57,16 +57,17 @@ exports.build = async ({ files, entrypoint, config }) => {
   if (setupPath) {
     await apt.install(setupPath);
   }
+  
+  log.heading('Running apt script');
+  setupPath = apt.findPostRequirements(entrypoint, files);
+  if (setupPath) {
+    await apt.install(setupPath);
+  }
+
   log.heading('Running pip script');
   const requirementsTxtPath = pip.findRequirements(entrypoint, files);
   if (requirementsTxtPath) {
     await pip.install(pipPath, srcDir, '-r', requirementsTxtPath);
-  }
-
-  log.heading('Running post-setup script');
-  setupPath = apt.findPostRequirements(entrypoint, files);
-  if (setupPath) {
-    await apt.install(setupPath);
   }
 
   log.heading('Preparing lambda bundle');
